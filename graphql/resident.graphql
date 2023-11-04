@@ -1,0 +1,74 @@
+type Query {
+	residents: [Resident]
+	resident(id: ID!): Resident
+}
+
+type Mutation {
+	resident_create(
+		first: String!
+		middle: String
+		last: String!
+		extension: String
+		sex: String!
+		birthday: String!
+		nationality: String!
+		contactNumber: String!
+		email: String!
+		residencyLength: String!
+		houseNumber: String!
+		street: String!
+		barangay: String!
+		province: String!
+		city: String!
+		zipcode: String!
+	): Resident
+	resident_update(
+		id: ID!
+		first: String
+		middle: String
+		last: String
+		extension: String
+		sex: String
+		birthday: String
+		nationality: String
+		contactNumber: String
+		email: String
+		residencyLength: String
+		houseNumber: String
+		street: String
+		barangay: String
+		province: String
+		city: String
+		zipcode: String
+	): Resident
+	resident_delete(id: ID!): Message
+}
+
+type Resident {
+	_id: ID
+	name: Name
+	sex: String
+	birthday: String
+	nationality: String
+	contactNumber: String
+	email: String
+	residencyLength: String
+	slug: String
+	address: Address
+}
+
+type Name {
+	first: String
+	middle: String
+	last: String
+	extension: String
+}
+
+type Address {
+	houseNumber: String
+	street: String
+	barangay: String
+	province: String
+	city: String
+	zipcode: String
+}
