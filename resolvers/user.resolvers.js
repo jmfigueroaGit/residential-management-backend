@@ -5,12 +5,18 @@ const {
 	updateUser,
 	deleteUser,
 } = require('../controllers/user_controller.js');
+const {
+	isAuthenticated,
+	requiresRole,
+} = require('../middlewares/auth_middleware');
 
 module.exports = {
 	Query: {
-		users: () => {
-			return getAllUsers();
-		},
+		users: requiresRole([1, 5])(
+			isAuthenticated((_, args, context) => {
+				return getAllUsers();
+			})
+		),
 		user: (_, args) => {
 			return getSingleUser(args);
 		},

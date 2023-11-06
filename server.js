@@ -23,13 +23,14 @@ const {
 	ForbiddenError,
 	InputError,
 } = require('./utils/error_handler.js');
+const { decoded } = require('./utils/generate_token.js');
 
 (async function () {
 	dotenv.config();
 	const app = express();
+	app.use(cookieParser());
 
 	connectDB();
-
 	const typeDefs = loadFilesSync(path.join(__dirname, '**/*.graphql'));
 	const resolvers = loadFilesSync(path.join(__dirname, '**/*.resolvers.js'));
 
@@ -79,17 +80,39 @@ const {
 	await server.start();
 	app.use(
 		'/graphql',
+		cookieParser(),
 		cors(),
 		express.json(),
+		express.urlencoded({ extended: true }),
 		expressMiddleware(server, {
-			context: async ({ req }) => ({ token: req.headers.token }),
-		})
+			context: async ({ req, res }) => {
+				let user = null;
+
+				const token = req.cookies['auth-token'];
+				if (token) {
+					try {
+						// Verify and decode the token
+						user = await decoded(token);
+					} catch (error) {
+						// Handle specific types of token errors
+						if (error.name === 'TokenExpiredError') {
+							throw new Error('Your session has expired. Please log in again.');
+						} else if (error.name === 'JsonWebTokenError') {
+							throw new Error('Invalid token. Please log in again.');
+						} else {
+							// Handle other kinds of unexpected errors
+							throw new Error('Authentication error.');
+						}
+					}
+				}
+
+				// Always return req and res, along with the user if they're authenticated
+				return { req, res, user };
+			},
+		}),
+		morgan('dev'),
+		helmet()
 	);
-	app.use(express.urlencoded({ extended: true }));
-	app.use(cors());
-	app.use(helmet());
-	app.use(morgan('dev'));
-	app.use(cookieParser());
 
 	await new Promise((resolve) => httpServer.listen({ port: 4000 }, resolve));
 	console.log(`🚀 Server ready at http://localhost:4000/graphql`);
