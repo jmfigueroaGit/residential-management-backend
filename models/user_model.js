@@ -70,6 +70,17 @@ userSchema.methods.getResetPasswordToken = function () {
 	return resetToken;
 };
 
+userSchema.virtual('resident', {
+	ref: 'Resident',
+	localField: '_id',
+	foreignField: 'user',
+	justOne: true,
+});
+
+// Make sure to set the `toObject` and `toJSON` schema options to `true`.
+userSchema.set('toObject', { virtuals: true });
+userSchema.set('toJSON', { virtuals: true });
+
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;

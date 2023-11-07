@@ -1,3 +1,18 @@
+type User {
+	_id: ID
+	username: String
+	email: String
+	password: String
+	verified: Boolean
+	role: Int
+	notification: Boolean
+	resident: Resident
+}
+
+type Message {
+	message: String
+}
+
 type Query {
 	users: [User]
 	user(id: ID!): User
@@ -20,18 +35,4 @@ type Mutation {
 		notification: Boolean
 	): User
 	user_delete(id: ID!): Message
-}
-
-type User {
-	_id: ID
-	username: String
-	email: String
-	password: String
-	verified: Boolean
-	role: Int
-	notification: Boolean
-}
-
-type Message {
-	message: String
 }

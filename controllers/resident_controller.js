@@ -28,60 +28,37 @@ const getSingleResident = asyncHandler(async (args) => {
 
 // @desc    Create Resident
 // @access  Private || Admin
-const createResident = asyncHandler(async (args) => {
+const createResident = asyncHandler(async (args, context) => {
+	const { user } = context;
 	const {
-		first,
-		middle,
-		last,
-		extension,
+		name,
 		sex,
 		birthday,
 		nationality,
 		contactNumber,
-		email,
 		residencyLength,
-		houseNumber,
-		street,
-		barangay,
-		province,
-		city,
-		zipcode,
+		occupation,
+		address,
 		image_url,
 	} = args;
 
 	// Find phone number in the Resident's database
 	const contactExist = await Resident.findOne({ contactNumber });
 
-	// Find email in the Resident's database
-	const emailExist = await Resident.findOne({ email });
-
 	// Check phone number if already existed
 	if (contactExist) throw new ValidationError('Phone number is already used.');
 
-	// Check phone number if already existed
-	if (emailExist) throw new ValidationError('Email is already used.');
-
 	const resident = await Resident.create({
-		name: {
-			first,
-			middle,
-			last,
-			extension,
-		},
+		user,
+		name,
 		sex,
 		birthday,
 		nationality,
 		contactNumber,
-		email,
+		email: user.email,
 		residencyLength,
-		address: {
-			houseNumber,
-			street,
-			barangay,
-			province,
-			city,
-			zipcode,
-		},
+		occupation,
+		address,
 		image_url,
 	});
 
@@ -115,6 +92,7 @@ const updateResident = asyncHandler(async (args) => {
 	resident.address.province = args.province || resident.address.province;
 	resident.address.city = args.city || resident.address.city;
 	resident.address.zipcode = args.zipcode || resident.address.zipcode;
+	resident.occupation = args.occupation || resident.occupation;
 	resident.image_url = args.image_url || resident.image_url;
 
 	const updatedResident = await resident.save();

@@ -22,14 +22,18 @@ module.exports = {
 		},
 	},
 	Mutation: {
-		user_create: (_, args) => {
-			return createUser(args);
-		},
-		user_update: (_, args) => {
+		user_create: requiresRole([1])(
+			isAuthenticated((_, args) => {
+				return createUser(args);
+			})
+		),
+		user_update: isAuthenticated((_, args) => {
 			return updateUser(args);
-		},
-		user_delete: (_, args) => {
-			return deleteUser(args);
-		},
+		}),
+		user_delete: requiresRole([1])(
+			isAuthenticated((_, args) => {
+				return deleteUser(args);
+			})
+		),
 	},
 };

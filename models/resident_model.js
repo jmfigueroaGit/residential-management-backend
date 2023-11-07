@@ -6,6 +6,7 @@ const residentSchema = new mongoose.Schema(
 		user: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'User',
+			required: true,
 		},
 		name: {
 			first: {
@@ -52,6 +53,10 @@ const residentSchema = new mongoose.Schema(
 		slug: {
 			type: String,
 			unique: true,
+		},
+		occupation: {
+			type: String,
+			default: 'none',
 		},
 		address: {
 			houseNumber: { type: String, required: true },

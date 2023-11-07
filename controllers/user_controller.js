@@ -11,7 +11,7 @@ const bcrypt = require('bcryptjs');
 // @desc    Get All Users
 // @access  Private || Admin
 const getAllUsers = asyncHandler(async (args) => {
-	const users = await User.find();
+	const users = await User.find().populate('resident');
 
 	return users;
 });
@@ -20,7 +20,7 @@ const getAllUsers = asyncHandler(async (args) => {
 // @access  Private || Admin
 const getSingleUser = asyncHandler(async (args) => {
 	const { id } = args;
-	const user = await User.findById(id);
+	const user = await User.findById(id).populate('resident');
 
 	if (user) return user;
 	else throw new NotFoundError('User not found with this id');
@@ -74,7 +74,9 @@ const updateUser = asyncHandler(async (args) => {
 
 	const updatedUser = await User.findByIdAndUpdate(user._id, updatedData, {
 		new: true,
-	}).select('+password');
+	})
+		.select('+password')
+		.populate('resident');
 
 	return updatedUser;
 });

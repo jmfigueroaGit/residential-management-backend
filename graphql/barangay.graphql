@@ -1,0 +1,25 @@
+type Barangay {
+	_id: ID!
+	name: String!
+	location: Location!
+	adminIds: [ID!]
+}
+
+type Location {
+	type: String!
+	coordinates: [Float!]!
+}
+
+input LocationInput {
+	type: String!
+	coordinates: [Float!]!
+}
+
+type Query {
+	barangays: [Barangay]
+	barangay(barangayId: String!): Barangay
+}
+
+type Mutation {
+	barangay_create(name: String!, location: LocationInput!): Barangay
+}

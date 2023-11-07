@@ -5,25 +5,33 @@ const {
 	updateResident,
 	deleteResident,
 } = require('../controllers/resident_controller');
+const {
+	isAuthenticated,
+	requiresRole,
+} = require('../middlewares/auth_middleware');
 
 module.exports = {
 	Query: {
-		residents: () => {
-			return getAllResident();
-		},
-		resident: (_, args) => {
-			return getSingleResident(args);
-		},
+		residents: requiresRole([1])(
+			isAuthenticated(() => {
+				return getAllResident();
+			})
+		),
+		resident: requiresRole([1])(
+			isAuthenticated((_, args) => {
+				return getSingleResident(args);
+			})
+		),
 	},
 	Mutation: {
-		resident_create: (_, args) => {
-			return createResident(args);
-		},
-		resident_update: (_, args) => {
-			return updateResident(args);
-		},
-		resident_delete: (_, args) => {
-			return deleteResident(args);
-		},
+		resident_create: isAuthenticated((_, args, context) => {
+			return createResident(args, context);
+		}),
+		resident_update: isAuthenticated((_, args, context) => {
+			return updateResident(args, context);
+		}),
+		resident_delete: isAuthenticated((_, args, context) => {
+			return deleteResident(args, context);
+		}),
 	},
 };

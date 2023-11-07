@@ -56,11 +56,6 @@ const registerUser = asyncHandler(async (args) => {
 const logout = asyncHandler(async (args, context) => {
 	const { res } = context;
 
-	// res.cookie('auth-token', '', {
-	// 	expires: new Date(Date.now() + 10 * 1000),
-	// 	httpOnly: true,
-	// });
-
 	res.clearCookie('auth-token');
 
 	return { message: 'User logged out' };
