@@ -2,7 +2,7 @@ type Barangay {
 	_id: ID!
 	name: String!
 	location: Location!
-	adminIds: [ID!]
+	adminIds: [User!]
 }
 
 type Location {
@@ -22,4 +22,11 @@ type Query {
 
 type Mutation {
 	barangay_create(name: String!, location: LocationInput!): Barangay
+	barangay_update(
+		barangayId: ID!
+		name: String
+		location: LocationInput
+		adminIds: [ID]
+	): Barangay
+	barangay_delete(barangayId: ID!): Message
 }

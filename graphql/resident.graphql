@@ -10,6 +10,7 @@ type Resident {
 	slug: String!
 	occupation: String!
 	address: Address!
+	barangay: Barangay
 }
 
 type Name {
@@ -53,6 +54,7 @@ type Mutation {
 	resident_create(
 		name: NameInput!
 		sex: String!
+		barangayId: String!
 		birthday: String!
 		nationality: String!
 		contactNumber: String!
@@ -62,10 +64,7 @@ type Mutation {
 	): Resident
 	resident_update(
 		id: ID!
-		first: String
-		middle: String
-		last: String
-		extension: String
+		name: NameInput
 		sex: String
 		birthday: String
 		nationality: String
@@ -74,6 +73,7 @@ type Mutation {
 		residencyLength: String
 		occupation: String
 		address: AddressInput!
+		barangayId: String
 	): Resident
 	resident_delete(id: ID!): Message
 }

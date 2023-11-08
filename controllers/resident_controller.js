@@ -5,11 +5,12 @@ const {
 	ValidationError,
 } = require('../utils/error_handler');
 const Resident = require('../models/resident_model');
+const { isBarangayExists } = require('../middlewares/auth_middleware');
 
 // @desc    Get All Residents
 // @access  Private || Admin
 const getAllResident = asyncHandler(async (args) => {
-	const residents = await Resident.find();
+	const residents = await Resident.find().populate('barangay');
 
 	return residents;
 });
@@ -19,7 +20,7 @@ const getAllResident = asyncHandler(async (args) => {
 const getSingleResident = asyncHandler(async (args) => {
 	const { id } = args;
 
-	const resident = await Resident.findById(id);
+	const resident = await Resident.findById(id).populate('barangay');
 
 	if (!resident) throw new NotFoundError('Resident not found with this id');
 
@@ -40,6 +41,7 @@ const createResident = asyncHandler(async (args, context) => {
 		occupation,
 		address,
 		image_url,
+		barangayId,
 	} = args;
 
 	// Find phone number in the Resident's database
@@ -48,8 +50,12 @@ const createResident = asyncHandler(async (args, context) => {
 	// Check phone number if already existed
 	if (contactExist) throw new ValidationError('Phone number is already used.');
 
+	// Use the abstracted function
+	const barangay = await isBarangayExists(barangayId);
+
 	const resident = await Resident.create({
 		user,
+		barangay,
 		name,
 		sex,
 		birthday,
@@ -64,7 +70,7 @@ const createResident = asyncHandler(async (args, context) => {
 
 	if (!resident) throw new InputError('Invalid data input');
 
-	return resident;
+	return resident.populate('barangay');
 });
 
 // @desc    Update Single Resident
@@ -97,7 +103,7 @@ const updateResident = asyncHandler(async (args) => {
 
 	const updatedResident = await resident.save();
 
-	return updatedResident;
+	return updatedResident.populate('barangay');
 });
 
 // @desc    Delete Single Resident
