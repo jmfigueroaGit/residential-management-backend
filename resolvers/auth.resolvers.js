@@ -3,6 +3,7 @@ const {
 	registerUser,
 	getMe,
 	logout,
+	verifyEmail,
 } = require('../controllers/auth_controller');
 const { isAuthenticated } = require('../middlewares/auth_middleware');
 
@@ -21,6 +22,9 @@ module.exports = {
 		},
 		auth_register: (_, args) => {
 			return registerUser(args);
+		},
+		auth_verify: (_, args, context) => {
+			return verifyEmail(args, context);
 		},
 	},
 };

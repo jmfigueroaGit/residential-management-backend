@@ -7,7 +7,9 @@ const {
 const User = require('../models/user_model.js');
 const bcrypt = require('bcryptjs');
 const { generateToken } = require('../utils/generate_token.js');
+const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
+const sendEmail = require('../utils/send_mail.js');
 
 // @desc    Login User
 // @access  Public
@@ -69,4 +71,76 @@ const getMe = asyncHandler(async (args, context) => {
 	return user;
 });
 
-module.exports = { loginUser, registerUser, logout, getMe };
+const verifyEmail = asyncHandler(async (args) => {
+	const { email } = args;
+
+	const user = await User.findOne({ email });
+
+	if (!user) {
+		throw new NotFoundError(`User not found with this email`);
+	}
+
+	// Generate reset token
+	const resetToken = user.getResetPasswordToken();
+
+	await user.save({ validateBeforeSave: true });
+
+	const message = resetToken;
+
+	try {
+		await sendEmail({
+			email: user.email,
+			subject: 'E-baryo Verify Email',
+			message,
+		});
+
+		return { message: `Email sent to ${user.email}` };
+	} catch (error) {
+		user.resetPasswordToken = undefined;
+		user.resetPasswordExpire = undefined;
+
+		await user.save({ validateBeforeSave: false });
+		throw new ValidationError(error.message);
+	}
+});
+
+const resetPassword = asyncHandler(async (args) => {
+	// Hash URL Token
+	const resetPasswordToken = crypto
+		.createHash('sha256')
+		.update(args.token)
+		.digest('hex');
+
+	const user = await User.findOne({
+		resetPasswordToken,
+		resetPasswordExpire: { $gt: Date.now() },
+	});
+
+	if (!user) {
+		throw new ValidationError(
+			'Password reset token in invalid or has been expired'
+		);
+	}
+
+	if (args.password !== args.confirmPassword) {
+		throw new InputError('Password doet not match');
+	}
+
+	// Setup the new password
+	user.password = args.password;
+	user.resetPasswordToken = undefined;
+	user.resetPasswordExpire = undefined;
+
+	await user.save();
+
+	return { message: 'Password Updated Successfully' };
+});
+
+module.exports = {
+	loginUser,
+	registerUser,
+	logout,
+	getMe,
+	verifyEmail,
+	resetPassword,
+};
