@@ -12,6 +12,7 @@ const bcrypt = require('bcryptjs');
 // @access  Private || Admin
 const getAllUsers = asyncHandler(async (args) => {
 	const users = await User.find().populate('resident');
+	console.log('fetch');
 
 	return users;
 });

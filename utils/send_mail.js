@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const { ValidationError } = require('./error_handler');
 
 const sendEmail = async (options) => {
 	const transport = nodemailer.createTransport({
@@ -22,4 +23,30 @@ const sendEmail = async (options) => {
 	console.log('Message sent %s', info.messageId);
 };
 
-module.exports = sendEmail;
+const sendVerificationEmail = async ({ user, subject, message }) => {
+	try {
+		let emailRecipient;
+		if (user && user.email) {
+			emailRecipient = user.email;
+		} else {
+			throw new Error('User email is required.');
+		}
+		const result = await sendEmail({
+			email: emailRecipient,
+			subject: subject || 'E-baryo Verify Email',
+			message: message || `E-baryo Verification Message`,
+		});
+		return result;
+	} catch (error) {
+		if (user) {
+			user.resetPasswordToken = undefined;
+			user.resetPasswordExpire = undefined;
+
+			await user.save({ validateBeforeSave: false });
+		}
+
+		throw new ValidationError(error.message);
+	}
+};
+
+module.exports = { sendEmail, sendVerificationEmail };

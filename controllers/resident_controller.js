@@ -6,6 +6,7 @@ const {
 } = require('../utils/error_handler');
 const Resident = require('../models/resident_model');
 const { isBarangayExists } = require('../middlewares/auth_middleware');
+const User = require('../models/user_model');
 
 // @desc    Get All Residents
 // @access  Private || Admin
@@ -70,6 +71,10 @@ const createResident = asyncHandler(async (args, context) => {
 
 	if (!resident) throw new InputError('Invalid data input');
 
+	const verifyUser = await User.findById(user._id);
+
+	verifyUser.verified = true;
+	await verifyUser.save({ validateBeforeSave: true });
 	return resident.populate('barangay');
 });
 

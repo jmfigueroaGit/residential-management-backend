@@ -12,11 +12,9 @@ const {
 
 module.exports = {
 	Query: {
-		users: requiresRole([1, 5])(
-			isAuthenticated((_, args, context) => {
-				return getAllUsers();
-			})
-		),
+		users: (_, args, context) => {
+			return getAllUsers();
+		},
 		user: (_, args) => {
 			return getSingleUser(args);
 		},

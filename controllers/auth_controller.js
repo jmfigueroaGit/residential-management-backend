@@ -3,13 +3,18 @@ const {
 	InputError,
 	NotFoundError,
 	ValidationError,
+	ForbiddenError,
 } = require('../utils/error_handler');
 const User = require('../models/user_model.js');
 const bcrypt = require('bcryptjs');
-const { generateToken } = require('../utils/generate_token.js');
+const {
+	generateToken,
+	generateDefaultPassword,
+} = require('../utils/generate_token.js');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
-const sendEmail = require('../utils/send_mail.js');
+const { sendEmail, sendVerificationEmail } = require('../utils/send_mail.js');
+const extractUsernameFromEmail = require('../utils/extract_email.js');
 
 // @desc    Login User
 // @access  Public
@@ -29,6 +34,46 @@ const loginUser = asyncHandler(async (args, context) => {
 
 		return { user, token };
 	} else throw new ValidationError('Username or Password is incorrect');
+});
+
+// @desc    Register Email
+// @access  Public
+const registerEmail = asyncHandler(async (args, context) => {
+	const { email } = args;
+
+	const emailExisted = await User.findOne({ email });
+
+	if (emailExisted) {
+		throw new InputError('Email is already used.');
+	}
+
+	const password = generateDefaultPassword(email);
+	const username = extractUsernameFromEmail(email);
+
+	const user = await User.create({
+		email,
+		password,
+		username,
+	});
+
+	// Generate reset token
+	const resetToken = user.getResetPasswordToken();
+
+	await user.save({ validateBeforeSave: true });
+	try {
+		const verificationSubject = 'E-baryo Verification Email';
+		const verificationMessage = `E-baryo Verification Message ${resetToken}`;
+
+		await sendVerificationEmail({
+			user,
+			subject: verificationSubject,
+			message: verificationMessage,
+		});
+
+		return { message: `Email sent to ${user.email}` };
+	} catch (error) {
+		throw new InputError(error.message);
+	}
 });
 
 // @desc    Register User
@@ -71,7 +116,7 @@ const getMe = asyncHandler(async (args, context) => {
 	return user;
 });
 
-const verifyEmail = asyncHandler(async (args) => {
+const forgotPassword = asyncHandler(async (args) => {
 	const { email } = args;
 
 	const user = await User.findOne({ email });
@@ -104,6 +149,33 @@ const verifyEmail = asyncHandler(async (args) => {
 	}
 });
 
+// @desc    Verify Token
+// @access  Private
+const verifyResetToken = asyncHandler(async (args) => {
+	const { token } = args;
+
+	// Hash URL Token
+	const resetPasswordToken = crypto
+		.createHash('sha256')
+		.update(args.token)
+		.digest('hex');
+
+	const user = await User.findOne({
+		resetPasswordToken,
+		resetPasswordExpire: { $gt: Date.now() },
+	});
+
+	if (!user) {
+		throw new ForbiddenError(
+			'Password reset token in invalid or has been expired'
+		);
+	}
+
+	return { message: 'Valid token' };
+});
+
+// @desc   	Reset Password
+// @access  Private
 const resetPassword = asyncHandler(async (args) => {
 	// Hash URL Token
 	const resetPasswordToken = crypto
@@ -117,7 +189,7 @@ const resetPassword = asyncHandler(async (args) => {
 	});
 
 	if (!user) {
-		throw new ValidationError(
+		throw new ForbiddenError(
 			'Password reset token in invalid or has been expired'
 		);
 	}
@@ -138,9 +210,11 @@ const resetPassword = asyncHandler(async (args) => {
 
 module.exports = {
 	loginUser,
+	registerEmail,
 	registerUser,
 	logout,
 	getMe,
-	verifyEmail,
+	forgotPassword,
+	verifyResetToken,
 	resetPassword,
 };

@@ -3,7 +3,10 @@ const {
 	registerUser,
 	getMe,
 	logout,
-	verifyEmail,
+	forgotPassword,
+	registerEmail,
+	resetPassword,
+	verifyResetToken,
 } = require('../controllers/auth_controller');
 const { isAuthenticated } = require('../middlewares/auth_middleware');
 
@@ -24,7 +27,16 @@ module.exports = {
 			return registerUser(args);
 		},
 		auth_verify: (_, args, context) => {
-			return verifyEmail(args, context);
+			return registerEmail(args, context);
+		},
+		auth_forgot_password: (_, args, context) => {
+			return forgotPassword(args, context);
+		},
+		auth_verify_token: (_, args) => {
+			return verifyResetToken(args);
+		},
+		auth_reset_password: (_, args, context) => {
+			return resetPassword(args);
 		},
 	},
 };
