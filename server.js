@@ -77,11 +77,16 @@ const { decoded } = require('./utils/generate_token.js');
 			return error;
 		},
 	});
+
+	const corsOptions = {
+		origin: true, // Allow requests from this origin
+		credentials: true, // Allow sending cookies
+	};
 	await server.start();
 	app.use(
 		'/graphql',
 		cookieParser(),
-		cors(),
+		cors(corsOptions),
 		express.json(),
 		express.urlencoded({ extended: true }),
 		expressMiddleware(server, {

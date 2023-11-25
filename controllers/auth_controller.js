@@ -19,9 +19,9 @@ const extractUsernameFromEmail = require('../utils/extract_email.js');
 // @desc    Login User
 // @access  Public
 const loginUser = asyncHandler(async (args, context) => {
-	const { username, password } = args;
+	const { email, password } = args;
 
-	const user = await User.findOne({ username }).select('+password');
+	const user = await User.findOne({ email }).select('+password');
 
 	if (user && (await user.comparePassword(password))) {
 		const token = generateToken(user._id);
@@ -33,7 +33,7 @@ const loginUser = asyncHandler(async (args, context) => {
 		});
 
 		return { user, token };
-	} else throw new ValidationError('Username or Password is incorrect');
+	} else throw new ValidationError('Email or Password is incorrect');
 });
 
 // @desc    Register Email
@@ -111,6 +111,7 @@ const logout = asyncHandler(async (args, context) => {
 // @desc     Get current logged in user
 // @access  Private
 const getMe = asyncHandler(async (args, context) => {
+	console.log(context);
 	const { user } = context;
 
 	return user;
