@@ -11,7 +11,6 @@ const residentSchema = new mongoose.Schema(
 		barangay: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: 'Barangay',
-			required: true,
 		},
 		name: {
 			first: {
@@ -38,6 +37,11 @@ const residentSchema = new mongoose.Schema(
 			type: String,
 			required: [true, 'Birthday field is required'],
 		},
+		civilStatus: {
+			type: String,
+			required: [true, 'Civil Status is required'],
+			default: 'single',
+		},
 		nationality: {
 			type: String,
 			required: [true, 'Nationality field is required'],
@@ -50,26 +54,64 @@ const residentSchema = new mongoose.Schema(
 			type: String,
 			required: [true, 'Email field is required'],
 		},
-		residencyLength: {
-			type: String,
-			required: true,
-			default: '1',
+		contactPerson: {
+			name: {
+				type: String,
+				required: true,
+			},
+			contactNumber: {
+				type: String,
+			},
+			relationship: {
+				type: String,
+				required: true,
+			},
+			address: {
+				type: String,
+			},
 		},
+
 		slug: {
 			type: String,
 			unique: true,
-		},
-		occupation: {
-			type: String,
-			default: 'none',
 		},
 		address: {
 			houseNumber: { type: String, required: true },
 			street: { type: String, required: true },
 			barangay: { type: String, required: true },
-			province: { type: String, required: true },
+			region: { type: String, required: true },
 			city: { type: String, required: true },
 			zipcode: { type: String, required: true },
+		},
+		background: {
+			employment: {
+				type: String,
+				default: 'none',
+			},
+			highEduAttainment: {
+				type: String,
+				default: 'none',
+			},
+			isSeniorCitizen: {
+				type: Boolean,
+				default: false,
+			},
+			isPWD: {
+				type: Boolean,
+				default: false,
+			},
+			isSingleParent: {
+				type: Boolean,
+				default: false,
+			},
+			isStudent: {
+				type: Boolean,
+				default: false,
+			},
+			residencyLength: {
+				type: Number,
+				default: 1,
+			},
 		},
 		image_url: String,
 	},

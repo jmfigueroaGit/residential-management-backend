@@ -3,13 +3,15 @@ type Resident {
 	name: Name!
 	sex: String!
 	birthday: String!
+	civilStatus: String!
 	nationality: String!
 	contactNumber: String!
 	email: String!
-	residencyLength: String!
+	contactPerson: ContactPerson!
 	slug: String!
-	occupation: String!
 	address: Address!
+	background: Background
+	image_url: String
 	barangay: Barangay
 }
 
@@ -20,14 +22,33 @@ type Name {
 	extension: String
 }
 
+type ContactPerson {
+	name: String!
+	contactNumber: String
+	relationship: String!
+	address: String
+}
+
+type Background {
+	employment: String
+	highEduAttainment: String
+	isSeniorCitizen: String
+	isPWD: Boolean
+	isSingleParent: Boolean
+	isStudent: Boolean
+	residencyLength: Int
+}
+
 type Address {
 	houseNumber: String!
 	street: String!
 	barangay: String!
-	province: String!
+	region: String!
 	city: String!
 	zipcode: String!
 }
+
+# Inputs
 
 input NameInput {
 	first: String!
@@ -36,11 +57,28 @@ input NameInput {
 	extension: String
 }
 
+input ContactPersonInput {
+	name: String!
+	contactNumber: String
+	relationship: String!
+	address: String
+}
+
+input BackgroundInput {
+	employment: String
+	highEduAttainment: String
+	isSeniorCitizen: Boolean
+	isPWD: Boolean
+	isSingleParent: Boolean
+	isStudent: Boolean
+	residencyLength: Int
+}
+
 input AddressInput {
 	houseNumber: String!
 	street: String!
 	barangay: String!
-	province: String!
+	region: String!
 	city: String!
 	zipcode: String!
 }
@@ -54,26 +92,28 @@ type Mutation {
 	resident_create(
 		name: NameInput!
 		sex: String!
-		barangayId: String!
 		birthday: String!
+		civilStatus: String!
 		nationality: String!
 		contactNumber: String!
-		residencyLength: String!
-		occupation: String!
-		address: AddressInput
+		contactPerson: ContactPersonInput!
+		address: AddressInput!
+		background: BackgroundInput
+		image_url: String
 	): Resident
 	resident_update(
 		id: ID!
 		name: NameInput
 		sex: String
 		birthday: String
+		civilStatus: String
 		nationality: String
 		contactNumber: String
 		email: String
-		residencyLength: String
-		occupation: String
-		address: AddressInput!
-		barangayId: String
+		contactPerson: ContactPersonInput
+		address: AddressInput
+		background: BackgroundInput
+		image_url: String
 	): Resident
 	resident_delete(id: ID!): Message
 }

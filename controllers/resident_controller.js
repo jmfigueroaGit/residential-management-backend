@@ -36,13 +36,13 @@ const createResident = asyncHandler(async (args, context) => {
 		name,
 		sex,
 		birthday,
+		civilStatus,
 		nationality,
 		contactNumber,
-		residencyLength,
-		occupation,
+		contactPerson,
 		address,
+		background,
 		image_url,
-		barangayId,
 	} = args;
 
 	// Find phone number in the Resident's database
@@ -52,29 +52,29 @@ const createResident = asyncHandler(async (args, context) => {
 	if (contactExist) throw new ValidationError('Phone number is already used.');
 
 	// Use the abstracted function
-	const barangay = await isBarangayExists(barangayId);
+	// const barangay = await isBarangayExists(barangayId);
 
 	const resident = await Resident.create({
 		user,
-		barangay,
 		name,
 		sex,
 		birthday,
+		civilStatus,
 		nationality,
 		contactNumber,
 		email: user.email,
-		residencyLength,
-		occupation,
+		contactPerson,
 		address,
+		background,
 		image_url,
 	});
 
 	if (!resident) throw new InputError('Invalid data input');
 
-	const verifyUser = await User.findById(user._id);
+	const isCompletedUser = await User.findById(user._id);
 
-	verifyUser.verified = true;
-	await verifyUser.save({ validateBeforeSave: true });
+	isCompletedUser.isCompleted = true;
+	await isCompletedUser.save({ validateBeforeSave: true });
 	return resident.populate('barangay');
 });
 
@@ -85,25 +85,51 @@ const updateResident = asyncHandler(async (args) => {
 	const resident = await Resident.findById(id);
 
 	if (!resident) throw new NotFoundError('Resident not found with this id');
-
-	resident.name.first = args.first || resident.name.first;
-	resident.name.middle = args.middle || resident.name.middle;
-	resident.name.last = args.last || resident.name.last;
-	resident.name.extension = args.extension || resident.name.extension;
+	// Personal Info
+	resident.name.first = args.name.first || resident.name.first;
+	resident.name.middle = args.name.middle || resident.name.middle;
+	resident.name.last = args.name.last || resident.name.last;
+	resident.name.extension = args.name.extension || resident.name.extension;
 	resident.sex = args.sex || resident.sex;
 	resident.birthday = args.birthday || resident.birthday;
+	resident.civilStatus = args.civilStatus || resident.civilStatus;
 	resident.nationality = args.nationality || resident.nationality;
 	resident.contactNumber = args.contactNumber || resident.contactNumber;
 	resident.email = args.email || resident.email;
-	resident.residencyLength = args.residencyLength || resident.residencyLength;
+	// Contact Person
+	resident.contactPerson.name =
+		args.contactPerson.name || resident.contactPerson.name;
+	resident.contactPerson.contactNumber =
+		args.contactPerson.contactNumber || resident.contactPerson.contactNumber;
+	resident.contactPerson.relationship =
+		args.contactPerson.relationship || resident.contactPerson.relationship;
+	resident.contactPerson.address =
+		args.contactPerson.address || resident.contactPerson.address;
+	// Address
 	resident.address.houseNumber =
-		args.houseNumber || resident.address.houseNumber;
-	resident.address.street = args.street || resident.address.street;
-	resident.address.barangay = args.barangay || resident.address.barangay;
-	resident.address.province = args.province || resident.address.province;
-	resident.address.city = args.city || resident.address.city;
-	resident.address.zipcode = args.zipcode || resident.address.zipcode;
-	resident.occupation = args.occupation || resident.occupation;
+		args.address.houseNumber || resident.address.houseNumber;
+	resident.address.street = args.address.street || resident.address.street;
+	resident.address.barangay =
+		args.address.barangay || resident.address.barangay;
+	resident.address.region = args.address.region || resident.address.region;
+	resident.address.city = args.address.city || resident.address.city;
+	resident.address.zipcode = args.address.zipcode || resident.address.zipcode;
+	// Background
+	resident.background.employment =
+		args.background.employment || resident.background.employment;
+	resident.background.highEduAttainment =
+		args.background.highEduAttainment || resident.background.highEduAttainment;
+	resident.background.isSeniorCitizen =
+		args.background.isSeniorCitizen || resident.background.isSeniorCitizen;
+	resident.background.isPWD =
+		args.background.isPWD || resident.background.isPWD;
+	resident.background.isSingleParent =
+		args.background.isSingleParent || resident.background.isSingleParent;
+	resident.background.isStudent =
+		args.background.isStudent || resident.background.isStudent;
+	resident.background.residencyLength =
+		args.background.residencyLength || resident.background.residencyLength;
+	// Other
 	resident.image_url = args.image_url || resident.image_url;
 
 	const updatedResident = await resident.save();

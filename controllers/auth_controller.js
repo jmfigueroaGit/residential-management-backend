@@ -111,7 +111,6 @@ const logout = asyncHandler(async (args, context) => {
 // @desc     Get current logged in user
 // @access  Private
 const getMe = asyncHandler(async (args, context) => {
-	console.log(context);
 	const { user } = context;
 
 	return user;
